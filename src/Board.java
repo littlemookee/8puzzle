@@ -79,6 +79,13 @@ public final class Board
     	return true;
     }
     
+    private int[][] getCopy(int[][] blocks)
+    {
+    	int[][] copy = new int[n][n];
+    	
+    	return copy;
+    }
+    
     /**
      * a board that is obtained by exchanging any pair of blocks
      * @return
@@ -90,14 +97,14 @@ public final class Board
     		for (int j = 0; j < n; j++)
     			blocksCopy[i][j] = blocks[i][j];
     	
-    	int k = 1;
-    	if (blocksCopy[(k-1) / n][(k-1) % n] == 0) k++;
+    	int k = 0;
+    	if (blocksCopy[k / n][k % n] == 0) k++;
     	int l = k+1;
-    	if (blocksCopy[(l-1) / n][(l-1) % n] == 0) l++;
+    	if (blocksCopy[l / n][l % n] == 0) l++;
     	
-    	int t = blocksCopy[(k-1) / n][(k-1) % n];
-    	blocksCopy[(k-1) / n][(k-1) % n] = blocksCopy[(l-1) / n][(l-1) % n];
-    	blocksCopy[(l-1) / n][(l-1) % n] = t;
+    	int t = blocksCopy[k / n][k % n];
+    	blocksCopy[k / n][k % n] = blocksCopy[l / n][l % n];
+    	blocksCopy[l / n][l % n] = t;
     	
     	return new Board(blocksCopy);
     }
@@ -125,6 +132,7 @@ public final class Board
     			if (blocks[i][j] == 0) {
     				zeroI = i;
     				zeroJ = j;
+    				break;
     			}
     	
     	for (int i = zeroI-1; i <= zeroI+1; i+=2)
