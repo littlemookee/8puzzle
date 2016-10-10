@@ -1,14 +1,14 @@
 /**
  * 
  * @author mikhail
+ * Created 			07.10.2016
+ * Last modified	10.10.2016
  *
  */
 
-import java.util.Iterator;
 import edu.princeton.cs.algs4.*;
 
-
-public final class Board
+public class Board
 {
 	private final int[][] blocks;
 	private final int n;
@@ -45,8 +45,11 @@ public final class Board
     	int h = 0;
     	int k = 1;
     	for (int i = 0; i < n; i++)
-    		for (int j = 0; j < n; j++)
-    			if (blocks[i][j] != 0 && blocks[i][j] != k++) h++;
+    		for (int j = 0; j < n; j++) {
+    			if (blocks[i][j] != 0 && blocks[i][j] != k) h++;
+    			k++;
+    		}
+    			
     	return h;
     }
     
@@ -59,10 +62,10 @@ public final class Board
     	int m = 0;
     	for (int i = 0; i < n; i++)
     		for (int j = 0; j < n; j++)
-    		{
-    			m += Math.abs((blocks[i][j]-1) / n - i);
-    			m += Math.abs((blocks[i][j]-1) % n - j);
-    		}
+    			if (blocks[i][j] != 0) {
+    				m += Math.abs((blocks[i][j]-1) / n - i);
+    				m += Math.abs((blocks[i][j]-1) % n - j);
+    			}
     	return m;
     }
     
@@ -74,39 +77,38 @@ public final class Board
     {
     	int k = 1;
     	for (int i = 0; i < n; i++)
-    		for (int j = 0; j < n; j++)
-    			if (blocks[i][j] != (k++ % n*n)) return false;
+    		for (int j = 0; j < n; j++)    			
+    			if (blocks[i][j] != k++ % (n*n)) return false;
     	return true;
     }
-    
-    private int[][] getCopy(int[][] blocks)
-    {
-    	int[][] copy = new int[n][n];
-    	
-    	return copy;
-    }
-    
+
     /**
      * a board that is obtained by exchanging any pair of blocks
      * @return
      */
     public Board twin()
     {
-    	int[][] blocksCopy = new int[n][n];
+    	// Make copy of blocks
+    	int[][] copy = new int[n][n];
     	for (int i = 0; i < n; i++)
     		for (int j = 0; j < n; j++)
-    			blocksCopy[i][j] = blocks[i][j];
+    			copy[i][j] = blocks[i][j];
     	
+    	// for exchange get first element
     	int k = 0;
-    	if (blocksCopy[k / n][k % n] == 0) k++;
+    	// if zero get next
+    	if (copy[k / n][k % n] == 0) k++;
+    	// and next after k element
     	int l = k+1;
-    	if (blocksCopy[l / n][l % n] == 0) l++;
+    	// if zero get next
+    	if (copy[l / n][l % n] == 0) l++;
     	
-    	int t = blocksCopy[k / n][k % n];
-    	blocksCopy[k / n][k % n] = blocksCopy[l / n][l % n];
-    	blocksCopy[l / n][l % n] = t;
+    	// exchange them
+    	int t = copy[k / n][k % n];
+    	copy[k / n][k % n] = copy[l / n][l % n];
+    	copy[l / n][l % n] = t;
     	
-    	return new Board(blocksCopy);
+    	return new Board(copy);
     }
     
     /**
@@ -114,6 +116,9 @@ public final class Board
      */
     public boolean equals(Object y)
     {
+    	if (y == null)
+    		return false;
+    	
     	return toString().equals(y.toString());
     }
     
@@ -125,26 +130,38 @@ public final class Board
     {
     	Stack<Board> stack = new Stack<Board>();
     	
+    	// Find 0-th element
     	int zeroI = 0;
     	int zeroJ = 0;
     	for (int i = 0; i < n; i++)
     		for (int j = 0; j < n; j++)
     			if (blocks[i][j] == 0) {
-    				zeroI = i;
-    				zeroJ = j;
+    				zeroI = i; zeroJ = j;
     				break;
     			}
     	
     	for (int i = zeroI-1; i <= zeroI+1; i+=2)
-    		for (int j = zeroJ-1; j <= zeroJ+1; j+=2) {
-    			if (i >= 0 && i < n && j >= 0 && j < n) {
-    				
-    				
-    			}
-    			
-    		}
-    			
-    	
+   			if (i >= 0 && i < n) {   				
+   				int t = blocks[zeroI][zeroJ];
+   				blocks[zeroI][zeroJ] = blocks[i][zeroJ]; 
+   				blocks[i][zeroJ] = t;
+   				stack.push(new Board(blocks));
+   				t = blocks[zeroI][zeroJ];
+   				blocks[zeroI][zeroJ] = blocks[i][zeroJ]; 
+   				blocks[i][zeroJ] = t;
+   			}
+
+   		for (int j = zeroJ-1; j <= zeroJ+1; j+=2)
+   			if (j >= 0 && j < n) {
+   				int t = blocks[zeroI][zeroJ];
+   				blocks[zeroI][zeroJ] = blocks[zeroI][j]; 
+   				blocks[zeroI][j] = t;
+   				stack.push(new Board(blocks));
+   				t = blocks[zeroI][zeroJ];
+   				blocks[zeroI][zeroJ] = blocks[zeroI][j]; 
+   				blocks[zeroI][j] = t;   				
+   			}
+   		
     	return stack;
     }
     
@@ -153,7 +170,13 @@ public final class Board
      */
     public String toString()
     {
-    	return null;
+    	String out = Integer.toString(n) + "\n";
+    	for (int i = 0; i < n; i++) {
+    		for (int j = 0; j < n; j++)
+    			out = out + " " + blocks[i][j];
+    		out = out + "\n";
+    	}
+    	return out;
     }
 
     /**
@@ -161,6 +184,16 @@ public final class Board
      * @param args
      */
     public static void main(String[] args)
-    {    	
+    {
+   	 // create initial board from file
+        In in = new In(args[0]);
+        int n = in.readInt();
+        int[][] blocks = new int[n][n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                blocks[i][j] = in.readInt();
+        Board board = new Board(blocks);
+        
+        StdOut.print(board.manhattan());
     }
 }
